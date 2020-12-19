@@ -1,49 +1,18 @@
 import asyncio
 import logging
-import uuid
 import websockets
 
+from client_connection import ClientConnection
 from game import Game
+from lobby import Lobby
 
 
-class ClientConnection:
-    def __init__(self, socket):
-        self.uuid = uuid.uuid4()
-        self.socket = socket
-        self.nickname = 'default nickname'
-        self.game = None
-        self.hand_cards = []
-
-    async def send_message(self, msg):
-        logging.debug(f'{self.uuid} - sending message to client: {msg}')
-        await self.socket.send(msg)
-
-
-class Lobby:
-    def __init__(self):
-        self.connections = []
-
-    async def add_connection(self, connection):
-        if connection not in self.connections:
-            self.connections.append(connection)
-            await connection.send_message('<lobby>: waiting')
-
-    def remove_connection(self, connection):
-        if connection in self.connections:
-            self.connections.remove(connection)
-
-    def get_players(self, num):
-        if len(self.connections) < num:
-            return None
-        return [self.connections.pop(0) for _ in range(num)]
-
-    def __len__(self):
-        return len(self.connections)
-
+HOST = "localhost"
+PORT = 10001
+PLAYERS_PER_GAME = 2
 
 lobby = Lobby()
 games = []
-PLAYERS_PER_GAME = 2
 
 
 async def server(websocket, path):
@@ -85,8 +54,8 @@ async def server(websocket, path):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    start_server = websockets.serve(server, "localhost", 10001)
+    start_server = websockets.serve(server, HOST, PORT)
     asyncio.get_event_loop().run_until_complete(start_server)
     asyncio.get_event_loop().run_forever()
 
-    logging.info('server started on port 10001')
+    logging.info(f'server started on {HOST}:{PORT}')
