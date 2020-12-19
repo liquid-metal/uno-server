@@ -1,0 +1,6 @@
+UNO Server
+==============
+
+This is an implementation for an online, multiplayer version of the game UNO.
+It works using websockets.
+
